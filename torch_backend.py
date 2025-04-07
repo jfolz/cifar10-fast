@@ -7,6 +7,7 @@ from itertools import count
 
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 cpu = torch.device("cpu")
 timerfn = torch.cuda.synchronize if torch.cuda.is_available() else None
 
@@ -76,7 +77,7 @@ class DataLoader():
     def __iter__(self):
         if self.set_random_choices:
             self.dataset.set_random_choices() 
-        return ({'input': x.to(device).float(), 'target': y.to(device).long()} for (x,y) in self.dataloader)
+        return ({'input': x.to(device=device, dtype=dtype), 'target': y.to(device).long()} for (x,y) in self.dataloader)
     
     def __len__(self): 
         return len(self.dataloader)
