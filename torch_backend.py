@@ -8,6 +8,7 @@ from itertools import count
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
+timerfn = torch.cuda.synchronize if torch.cuda.is_available() else None
 
 @cat.register(torch.Tensor)
 def _(*xs):
@@ -75,7 +76,7 @@ class DataLoader():
     def __iter__(self):
         if self.set_random_choices:
             self.dataset.set_random_choices() 
-        return ({'input': x.to(device).half(), 'target': y.to(device).long()} for (x,y) in self.dataloader)
+        return ({'input': x.to(device).float(), 'target': y.to(device).long()} for (x,y) in self.dataloader)
     
     def __len__(self): 
         return len(self.dataloader)
@@ -337,7 +338,7 @@ def log_activations(node_names=('loss', 'acc')):
         if batch:
             state['_tmp_logs_'].extend((k, state[OUTPUT][k].detach()) for k in node_names)
         else:
-            res = {k: to_numpy(torch.cat(xs)).astype(np.float) for k, xs in group_by_key(state['_tmp_logs_']).items()}
+            res = {k: to_numpy(torch.cat(xs)).astype(np.float32) for k, xs in group_by_key(state['_tmp_logs_']).items()}
             del state['_tmp_logs_']
             return {ACT_LOG: res}
     return step

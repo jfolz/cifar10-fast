@@ -31,7 +31,7 @@ default_table_formats = {float: '{:{w}.4f}', str: '{:>{w}s}', 'default': '{:{w}}
 
 def table_formatter(val, is_title=False, col_width=12, formats=None):
     formats = formats or default_table_formats
-    type_ = lambda val: float if isinstance(val, (float, np.float)) else type(val)
+    type_ = lambda val: float if isinstance(val, (float, np.float32)) else type(val)
     return (formats['title'] if is_title else formats.get(type_(val), formats['default'])).format(val, w=col_width)
 
 def every(n, col): 
